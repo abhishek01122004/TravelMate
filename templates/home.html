@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Plan Your Perfect Trip{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(244, 63, 94, 0.8) 100%), url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
+        min-height: 80vh;
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        margin-top: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .hero-title {
+        font-weight: 800;
+        font-size: 4rem;
+        letter-spacing: -0.05em;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .hero-subtitle {
+        font-size: 1.25rem;
+        font-weight: 400;
+        opacity: 0.9;
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section animate-fade-in px-4">
+    <div class="hero-content">
+        <h1 class="hero-title">Your Next Great<br>Adventure Starts Here</h1>
+        <p class="hero-subtitle">
+            Smart itineraries tailored to your budget, time, and travel style. Experience the world without the planning stress.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary" style="transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" href="{% url 'create_trip' %}">
+                Plan a Trip
+            </a>
+            <a class="btn btn-outline-light btn-lg rounded-pill px-5 fw-medium" style="backdrop-filter: blur(5px);" href="{% url 'destination_list' %}">
+                Explore Destinations
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

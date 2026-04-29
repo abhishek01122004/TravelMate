@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Booking requests{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+        <h1 class="h3 mb-0">Booking requests</h1>
+        <p class="text-muted small mb-0">All bookings for your hotels.</p>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'manager_hotel_list' %}">My hotels</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Guest</th>
+                    <th>Trip</th>
+                    <th>Hotel</th>
+                    <th>Room</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Guests</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.user.username }}</td>
+                        <td class="small">
+                            {% if booking.trip %}
+                                {{ booking.trip.destination.name }}<br />
+                                <span class="text-muted">#{{ booking.trip.id }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ booking.hotel.name }}</td>
+                        <td>{{ booking.room.room_type }}</td>
+                        <td>{{ booking.check_in }}</td>
+                        <td>{{ booking.check_out }}</td>
+                        <td>{{ booking.guests }}</td>
+                        <td>{{ booking.total_price }}</td>
+                        <td>
+                            {% if booking.status == 'Pending' %}
+                                <span class="badge text-bg-warning">Pending</span>
+                            {% elif booking.status == 'Approved' %}
+                                <span class="badge text-bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if booking.status == 'Pending' %}
+                                <form class="d-inline" method="post" action="{% url 'manager_booking_approve' booking.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success btn-sm" type="submit">Approve</button>
+                                </form>
+                                <form class="d-inline" method="post" action="{% url 'manager_booking_reject' booking.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">Reject</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">No bookings yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

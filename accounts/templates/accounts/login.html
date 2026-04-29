@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-3">Login</h1>
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}" />
+                    {% endif %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                </form>
+
+                <p class="text-muted mt-3 mb-0">
+                    New here?
+                    <a href="{% url 'signup' %}">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

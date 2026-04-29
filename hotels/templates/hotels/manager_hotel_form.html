@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | {{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-4">{{ title }}</h1>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {# ── Basic info ── #}
+                    {% for field in form %}
+                        {% if field.name in "name,destination,description" %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# ── Location section ── #}
+                    <hr class="my-4">
+                    <h2 class="h6 text-muted mb-1">📍 Location <span class="fw-normal">(optional)</span></h2>
+                    <p class="small text-muted mb-3">
+                        Enter coordinates from Google Maps so travellers can see how close this hotel
+                        is to nearby attractions.
+                        <strong>How to get them:</strong> open Google Maps → right-click your hotel location
+                        → the first line shown is <em>latitude, longitude</em>.
+                    </p>
+
+                    {# Address #}
+                    {% with field=form.address %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endwith %}
+
+                    {# Lat / Lng side by side #}
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            {% with field=form.latitude %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors }}</div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="col-6">
+                            {% with field=form.longitude %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors }}</div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="{% url 'manager_hotel_list' %}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

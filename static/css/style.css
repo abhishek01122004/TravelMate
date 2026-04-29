@@ -1,0 +1,209 @@
+/* 
+  TravelMate Design System 
+  Primary: Indigo (#4F46E5)
+  Accent: Coral (#F43F5E)
+*/
+
+:root {
+  --tm-primary: #4F46E5;
+  --tm-primary-hover: #4338ca;
+  --tm-accent: #F43F5E;
+  --tm-accent-hover: #e11d48;
+  --tm-bg: #F8FAFC;
+  --tm-surface: #FFFFFF;
+  --tm-text-main: #0F172A;
+  --tm-text-muted: #64748B;
+  --tm-border: #E2E8F0;
+  
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--tm-bg);
+  color: var(--tm-text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--tm-text-main);
+}
+
+.text-muted {
+  color: var(--tm-text-muted) !important;
+}
+
+/* Navbar */
+.navbar-glass {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--tm-border);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.navbar-glass .navbar-brand {
+  color: var(--tm-primary);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  font-size: 1.5rem;
+}
+
+.navbar-glass .nav-link {
+  color: var(--tm-text-main);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar-glass .nav-link:hover {
+  color: var(--tm-primary);
+}
+
+/* Buttons */
+.btn-tm-primary {
+  background: linear-gradient(135deg, var(--tm-primary), #6366f1);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-tm-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  color: white;
+}
+
+.btn-tm-accent {
+  background: var(--tm-accent);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-tm-accent:hover {
+  background: var(--tm-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+  color: white;
+}
+
+.btn-tm-ghost {
+  background: transparent;
+  color: var(--tm-primary);
+  border: 1px solid var(--tm-primary);
+  border-radius: 50rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-tm-ghost:hover {
+  background: rgba(79, 70, 229, 0.05);
+  color: var(--tm-primary);
+}
+
+/* Cards */
+.tm-card {
+  background: var(--tm-surface);
+  border-radius: 1rem;
+  border: 1px solid var(--tm-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.tm-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Inputs */
+.form-control, .form-select {
+  border-radius: 0.75rem;
+  border: 1px solid var(--tm-border);
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--tm-primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Badges */
+.tm-badge {
+  padding: 0.35em 0.8em;
+  border-radius: 50rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tm-badge-approved { background: #d1fae5; color: #065f46; }
+.tm-badge-pending { background: #fef3c7; color: #92400e; }
+.tm-badge-rejected { background: #fee2e2; color: #991b1b; }
+.tm-badge-match { background: #ffe4e6; color: #e11d48; }
+
+/* Timeline Itinerary */
+.timeline-container {
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--tm-border);
+}
+
+.timeline-step {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -2.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--tm-surface);
+  border: 2px solid var(--tm-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--tm-primary);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.timeline-travel-icon {
+  border-color: var(--tm-text-muted);
+  color: var(--tm-text-muted);
+  border-style: dashed;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}

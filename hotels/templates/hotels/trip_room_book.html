@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Confirm Booking{% endblock %}
+
+{% block content %}
+<div class="mb-4 animate-fade-in">
+    <a class="btn btn-sm btn-light border rounded-pill px-3 text-muted fw-medium" href="{% url 'trip_hotel_search' trip.id %}">
+        <i class="bi bi-arrow-left me-1"></i> Back to search
+    </a>
+</div>
+
+<div class="row g-4 animate-fade-in">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div class="tm-card p-4 p-md-5">
+            <div class="text-center mb-5">
+                <h1 class="h3 fw-bold mb-2">Confirm Your Booking</h1>
+                <p class="text-muted">Please provide details for all guests staying in the room.</p>
+            </div>
+
+            <div class="bg-light rounded-4 p-4 mb-5 border">
+                <h2 class="h5 fw-bold mb-3">{{ room.hotel.name }}</h2>
+                <div class="row g-3 text-muted small">
+                    <div class="col-sm-6">
+                        <i class="bi bi-calendar-check me-1 text-primary"></i> <strong>Check-in:</strong> {{ check_in }}
+                    </div>
+                    <div class="col-sm-6">
+                        <i class="bi bi-calendar-x me-1 text-primary"></i> <strong>Check-out:</strong> {{ check_out }}
+                    </div>
+                    <div class="col-sm-6">
+                        <i class="bi bi-moon me-1 text-primary"></i> <strong>Duration:</strong> {{ nights }} night{{ nights|pluralize }}
+                    </div>
+                    <div class="col-sm-6">
+                        <i class="bi bi-people me-1 text-primary"></i> <strong>Guests:</strong> {{ guests }}
+                    </div>
+                    <div class="col-12 mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-medium text-dark text-uppercase">Total Price:</span>
+                            <span class="fs-4 fw-bold text-dark">₹{{ total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="guests" value="{{ guests }}">
+                {{ formset.management_form }}
+
+                {% if formset.non_form_errors %}
+                    <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+                {% endif %}
+
+                <h3 class="h5 fw-bold mb-4">Guest Information</h3>
+                
+                <div class="row g-4">
+                    {% for form in formset %}
+                        <div class="col-12">
+                            <div class="p-4 border rounded-4 position-relative">
+                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary" style="margin-left: 20px;">
+                                    Guest {{ forloop.counter }}
+                                </span>
+                                
+                                <div class="row g-3 mt-1">
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium small text-muted">{{ form.name.label }}</label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-medium small text-muted">{{ form.age.label }}</label>
+                                        {{ form.age }}
+                                        {% if form.age.errors %}<div class="text-danger small mt-1">{{ form.age.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-medium small text-muted">{{ form.gender.label }}</label>
+                                        {{ form.gender }}
+                                        {% if form.gender.errors %}<div class="text-danger small mt-1">{{ form.gender.errors }}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 text-end">
+                    <button type="submit" class="btn btn-tm-primary btn-lg rounded-pill px-5 fw-bold">Confirm & Book Room <i class="bi bi-check-circle ms-2"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

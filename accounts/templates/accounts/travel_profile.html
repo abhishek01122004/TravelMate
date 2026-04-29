@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | My Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+  .trip-story-card {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background: var(--tm-surface);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    border: 1px solid var(--tm-border);
+    margin-bottom: 3rem;
+  }
+  .trip-story-header {
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2rem;
+  }
+  .trip-story-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.2) 100%);
+  }
+  .trip-story-content {
+    position: relative;
+    z-index: 1;
+  }
+  .trip-header-actions {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 2;
+  }
+  .section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--tm-text-muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .preview-timeline {
+    border-left: 2px solid var(--tm-border);
+    padding-left: 1rem;
+    margin-left: 0.5rem;
+  }
+  .preview-day {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  .preview-day::before {
+    content: '';
+    position: absolute;
+    left: -1.35rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--tm-primary);
+    border-radius: 50%;
+    border: 2px solid var(--tm-surface);
+  }
+  .hotel-booking-card {
+    border-radius: 1rem;
+    padding: 1rem;
+    background: var(--tm-bg);
+    border-left: 4px solid var(--tm-border);
+  }
+  .hotel-booking-card.status-approved { border-left-color: #10b981; }
+  .hotel-booking-card.status-pending { border-left-color: #f59e0b; }
+  .hotel-booking-card.status-rejected { border-left-color: #ef4444; }
+  
+  .cost-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+  .cost-box {
+    background: var(--tm-bg);
+    border-radius: 1rem;
+    padding: 1rem;
+    text-align: center;
+  }
+  .cost-box.grand {
+    background: var(--tm-primary);
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Profile Header -->
+<div class="tm-card p-4 p-md-5 mb-5 animate-fade-in">
+    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+        <!-- Profile Picture -->
+        <div class="position-relative">
+            {% if request.user.profile.profile_picture %}
+                <img src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid var(--tm-surface);">
+            {% else %}
+                <div class="rounded-circle shadow-sm bg-primary bg-gradient text-white d-flex align-items-center justify-content-center fw-bold" style="width: 100px; height: 100px; font-size: 2.5rem; border: 4px solid var(--tm-surface);">
+                    {{ request.user.username.0|upper }}
+                </div>
+            {% endif %}
+            <!-- Verification Badge (Optional polish) -->
+            <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;" title="Verified Traveler">
+                <i class="bi bi-check-lg text-white small"></i>
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="text-center text-md-start flex-grow-1">
+            <h1 class="h3 fw-bold mb-1">Hello, {{ request.user.username }}!</h1>
+            <div class="text-muted mb-2 d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-3">
+                <span><i class="bi bi-envelope me-1"></i> {{ request.user.email|default:"No email provided" }}</span>
+                {% if request.user.profile.phone_number %}
+                    <span><i class="bi bi-telephone me-1"></i> {{ request.user.profile.phone_number }}</span>
+                {% endif %}
+                {% if request.user.profile.city %}
+                    <span><i class="bi bi-geo-alt me-1"></i> {{ request.user.profile.city }}</span>
+                {% endif %}
+            </div>
+            {% if request.user.profile.age %}
+                <div class="badge bg-light text-secondary border fw-normal"><i class="bi bi-person me-1"></i> {{ request.user.profile.age }} years old</div>
+            {% endif %}
+        </div>
+        
+        <!-- Action Button -->
+        <div class="mt-3 mt-md-0">
+            <a href="{% url 'create_trip' %}" class="btn btn-tm-primary rounded-pill px-4 shadow-sm"><i class="bi bi-plus-lg me-2"></i> Plan New Trip</a>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4 animate-fade-in" style="animation-delay: 0.1s;">
+    <h2 class="h4 fw-bold mb-0">My Travel Stories</h2>
+    <p class="text-muted small">All your planned adventures in one place.</p>
+</div>
+
+{% if trip_cards %}
+  <div class="animate-fade-in" style="animation-delay: 0.2s;">
+    {% for card in trip_cards %}
+      {% with trip=card.trip %}
+      <div class="trip-story-card">
+        
+        <!-- Header Banner -->
+        <div class="trip-story-header" style="background-image: url('{{ trip.destination.display_cover_url }}');">
+          <div class="trip-story-overlay"></div>
+          
+          <div class="trip-header-actions d-flex flex-wrap gap-2">
+            <a class="btn btn-light btn-sm fw-medium rounded-pill px-3" style="backdrop-filter: blur(5px); background: rgba(255,255,255,0.9);" href="{% url 'itinerary' trip.id %}">
+              <i class="bi bi-map-fill text-primary me-1"></i> Open Itinerary
+            </a>
+            <a class="btn btn-tm-accent btn-sm rounded-pill px-3" href="{% url 'trip_hotel_search' trip.id %}">
+              <i class="bi bi-building me-1"></i> Find Hotels
+            </a>
+            <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 opacity-75 hover-opacity-100" data-bs-toggle="modal" data-bs-target="#deleteTripModal{{ trip.id }}" title="Delete Trip">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+          </div>
+
+          <div class="trip-story-content">
+            <div class="tm-badge bg-white text-dark mb-3 d-inline-block">{{ trip.trip_type|title }} Trip</div>
+            <h2 class="display-5 fw-bold mb-1">{{ trip.destination.name }}</h2>
+            <div class="d-flex flex-wrap gap-3 opacity-75">
+              <span><i class="bi bi-calendar3 me-1"></i> {{ trip.start_date|date:"M j" }} - {{ trip.end_date|date:"M j, Y" }} ({{ trip.days }} days)</span>
+              <span><i class="bi bi-people-fill me-1"></i> {{ trip.num_people }} Travelers</span>
+              <span><i class="bi bi-clock-history me-1"></i> Planned {{ trip.created_at|date:"M j" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body Content -->
+        <div class="p-4 p-lg-5">
+          <div class="row g-5">
+            
+            <!-- Column 1: Itinerary Preview -->
+            <div class="col-12 col-lg-5">
+              <div class="section-title"><i class="bi bi-signpost-split-fill fs-5 text-primary"></i> Itinerary Preview</div>
+              
+              {% if card.total_stops == 0 %}
+                <div class="text-muted small fst-italic p-3 bg-light rounded-3">No activities scheduled yet. <br><a href="{% url 'customize_itinerary' trip.id %}" class="fw-medium text-decoration-none mt-1 d-inline-block">Customize itinerary <i class="bi bi-arrow-right"></i></a></div>
+              {% else %}
+                <div class="preview-timeline">
+                  {% for plan in card.day_plans|slice:":3" %}
+                    <div class="preview-day">
+                      <div class="fw-bold mb-1">Day {{ plan.day }}</div>
+                      <div class="text-muted small">
+                        {% if plan.steps %}
+                          {% for step in plan.steps %}
+                            {% if step.type == 'attraction' %}
+                              {{ step.data.name }}{% if not forloop.last %}, {% endif %}
+                            {% endif %}
+                          {% endfor %}
+                        {% else %}
+                          <span class="fst-italic">Free day</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                  {% if card.day_plans|length > 3 %}
+                    <div class="text-muted small fw-medium mt-2"><a href="{% url 'itinerary' trip.id %}" class="text-decoration-none">View {{ card.day_plans|length|add:"-3" }} more days...</a></div>
+                  {% endif %}
+                </div>
+                <div class="mt-3"><a href="{% url 'customize_itinerary' trip.id %}" class="btn btn-sm btn-tm-ghost rounded-pill px-3">Edit Schedule</a></div>
+              {% endif %}
+            </div>
+
+            <!-- Column 2: Hotel Bookings -->
+            <div class="col-12 col-lg-7">
+              <div class="section-title"><i class="bi bi-door-open-fill fs-5 text-primary"></i> Hotel Bookings</div>
+              
+              {% if card.bookings_with_proximity %}
+                <div class="d-flex flex-column gap-3">
+                  {% for item in card.bookings_with_proximity %}
+                    {% with b=item.booking p=item.proximity %}
+                      <div class="hotel-booking-card {% if b.status == 'Approved' %}status-approved{% elif b.status == 'Pending' %}status-pending{% else %}status-rejected{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h5 class="fw-bold mb-1">{{ b.hotel.name }}</h5>
+                            <div class="small text-muted">{{ b.room.room_type }} • {{ b.guests }} guests</div>
+                          </div>
+                          <div>
+                            {% if b.status == 'Approved' %}
+                              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Confirmed</span>
+                            {% elif b.status == 'Pending' %}
+                              <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-50 text-dark rounded-pill px-2 py-1"><i class="bi bi-clock-fill me-1"></i> Pending</span>
+                            {% else %}
+                              <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span>
+                            {% endif %}
+                          </div>
+                        </div>
+
+                        {% if p.nearest_name %}
+                          <div class="d-flex gap-2 mb-2">
+                            {% if p.label == "Excellent location" %}
+                              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style="font-size:0.7rem;"><i class="bi bi-geo-fill"></i> Excellent</span>
+                            {% elif p.label == "Good location" %}
+                              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1" style="font-size:0.7rem;"><i class="bi bi-geo-fill"></i> Good</span>
+                            {% endif %}
+                            <span class="text-muted" style="font-size:0.75rem;">Nearest: {{ p.nearest_name }} ({{ p.nearest_km }}km)</span>
+                          </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-end mt-3 border-top pt-2 border-opacity-50">
+                          <div class="small text-muted fw-medium">{{ b.check_in|date:"M j" }} - {{ b.check_out|date:"M j, Y" }}</div>
+                          <div class="fw-bold text-dark">₹{{ b.total_price }}</div>
+                        </div>
+                      </div>
+                    {% endwith %}
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="p-4 bg-light rounded-4 text-center border">
+                  <p class="text-muted small mb-2">No hotel requests yet. A comfortable stay is key to a great trip!</p>
+                  <a href="{% url 'trip_hotel_search' trip.id %}" class="btn btn-sm btn-tm-primary rounded-pill px-3">Find a stay</a>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+
+          <!-- Cost Summary -->
+          <div class="mt-5 pt-4 border-top">
+            <div class="section-title"><i class="bi bi-wallet2 fs-5 text-primary"></i> Cost Breakdown</div>
+            <div class="cost-grid">
+              <div class="cost-box">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Activities</div>
+                <div class="fs-5 fw-bold">₹{{ card.scheduled_spend }}</div>
+              </div>
+              <div class="cost-box">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Hotels</div>
+                <div class="fs-5 fw-bold">₹{{ card.hotel_cost }}</div>
+              </div>
+              <div class="cost-box">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Remaining Budget</div>
+                <div class="fs-5 fw-bold {% if card.remaining_budget > 0 %}text-success{% else %}text-danger{% endif %}">₹{{ card.remaining_budget }}</div>
+              </div>
+              <div class="cost-box grand">
+                <div class="small text-uppercase fw-semibold text-white-50 mb-1">Total Trip Cost</div>
+                <div class="fs-4 fw-bold">₹{{ card.grand_total }}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+{% else %}
+  <!-- Empty State -->
+  <div class="tm-card p-5 text-center animate-fade-in" style="animation-delay: 0.1s;">
+    <div class="mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center bg-light text-primary rounded-circle" style="width: 100px; height: 100px;">
+        <i class="bi bi-globe-americas" style="font-size: 3rem;"></i>
+      </div>
+    </div>
+    <h2 class="h3 fw-bold mb-2">Your travel story awaits</h2>
+    <p class="text-muted mb-4 max-w-md mx-auto">You haven't planned any trips yet. Pick a destination, set your dates, and let's craft an unforgettable itinerary.</p>
+    <a class="btn btn-tm-primary btn-lg rounded-pill px-5" href="{% url 'create_trip' %}">Plan Your First Trip <i class="bi bi-arrow-right ms-2"></i></a>
+  </div>
+{% endif %}
+
+<!-- Delete Trip Modals (Placed outside to prevent stacking context issues) -->
+{% if trip_cards %}
+  {% for card in trip_cards %}
+    {% with trip=card.trip %}
+    <div class="modal fade" id="deleteTripModal{{ trip.id }}" tabindex="-1" aria-labelledby="deleteTripModalLabel{{ trip.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold text-danger" id="deleteTripModalLabel{{ trip.id }}">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Trip
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body py-4">
+            <p class="mb-2">Are you sure you want to delete your trip to <strong>{{ trip.destination.name }}</strong>?</p>
+            {% if card.bookings_with_proximity %}
+              <div class="alert alert-warning mt-3 border-0 bg-warning bg-opacity-10 text-dark">
+                <div class="d-flex align-items-start">
+                  <i class="bi bi-building-x me-3 text-warning fs-4"></i>
+                  <div>
+                    <strong>Warning:</strong> You have an active hotel booking for this trip. Deleting this trip will also <strong>cancel your hotel booking</strong>.
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            <p class="text-muted small mb-0 mt-3">This action cannot be undone.</p>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <form method="POST" action="{% url 'delete_trip' trip.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger rounded-pill px-4 fw-medium">Yes, Delete Trip</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+  {% endfor %}
+{% endif %}
+
+{% endblock %}

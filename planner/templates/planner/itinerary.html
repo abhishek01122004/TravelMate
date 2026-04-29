@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Your Itinerary{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 animate-fade-in">
+    <div>
+        <div class="tm-badge tm-badge-approved mb-2 d-inline-block">{{ trip.trip_type|title }} Trip</div>
+        <h1 class="h3 mb-1 fw-bold">Your Itinerary</h1>
+        <div class="text-muted d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill text-primary"></i> {{ destination.name }}
+            <span class="text-muted opacity-50">•</span>
+            <i class="bi bi-calendar-event"></i> {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-tm-ghost" href="{% url 'customize_itinerary' trip.id %}">
+            <i class="bi bi-sliders me-1"></i> Customize
+        </a>
+        <a class="btn btn-tm-accent" href="{% url 'trip_hotel_search' trip.id %}">
+            <i class="bi bi-building me-1"></i> Find Hotels
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-5 animate-fade-in" style="animation-delay: 0.1s;">
+    <div class="col-6 col-md-3">
+        <div class="tm-card p-3 text-center h-100 d-flex flex-column justify-content-center">
+            <div class="text-muted small fw-medium text-uppercase mb-1">Duration</div>
+            <div class="fs-3 fw-bold text-primary">{{ trip.days }} <span class="fs-6 text-muted fw-normal">Days</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="tm-card p-3 text-center h-100 d-flex flex-column justify-content-center">
+            <div class="text-muted small fw-medium text-uppercase mb-1">Travelers</div>
+            <div class="fs-3 fw-bold text-primary">{{ trip.num_people }} <span class="fs-6 text-muted fw-normal">People</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="tm-card p-3 text-center h-100 d-flex flex-column justify-content-center">
+            <div class="text-muted small fw-medium text-uppercase mb-1">Budget</div>
+            <div class="fs-3 fw-bold text-primary">₹{{ trip.budget }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="tm-card p-3 text-center h-100 d-flex flex-column justify-content-center bg-light">
+            <div class="text-muted small fw-medium text-uppercase mb-1">Remaining</div>
+            <div class="fs-3 fw-bold {% if remaining_budget > 0 %}text-success{% else %}text-danger{% endif %}">₹{{ remaining_budget }}</div>
+        </div>
+    </div>
+</div>
+
+{% if skipped_attractions %}
+    <div class="alert alert-warning border-0 tm-card mb-5 animate-fade-in" style="background: #fffbeb; animation-delay: 0.2s;">
+        <div class="d-flex gap-3">
+            <i class="bi bi-exclamation-circle-fill text-warning fs-4"></i>
+            <div>
+                <h6 class="fw-bold mb-1">{{ skipped_attractions|length }} attraction{{ skipped_attractions|length|pluralize }} skipped</h6>
+                <p class="mb-2 small text-muted">These stops didn't fit within your remaining budget or daily time limit.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for attraction in skipped_attractions %}
+                        <span class="badge bg-white text-dark border fw-medium">{{ attraction.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row justify-content-center animate-fade-in" style="animation-delay: 0.3s;">
+    <div class="col-12 col-lg-10">
+        {% for plan in day_plans %}
+            <div class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <span class="fs-5 fw-bold">{{ plan.day }}</span>
+                    </div>
+                    <div>
+                        <h3 class="h5 fw-bold mb-0">Day {{ plan.day }}</h3>
+                        <div class="text-muted small">
+                            <i class="bi bi-clock me-1"></i> {{ plan.hours }}h total 
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-wallet2 me-1"></i> ₹{{ plan.cost }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-container ms-3">
+                    {% for step in plan.steps %}
+                        {% if step.type == 'attraction' %}
+                            <div class="timeline-step">
+                                <div class="timeline-icon">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div class="tm-card p-3 ms-4 tm-card-hover">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="fw-bold mb-1">{{ step.data.name }}</h5>
+                                            <span class="badge bg-light text-primary border mb-2">{{ step.data.category }}</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-primary">₹{{ step.data.approx_cost }}</div>
+                                            <div class="text-muted small"><i class="bi bi-stopwatch"></i> {{ step.data.estimated_time }}h</div>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted small mb-0 mt-2">{{ step.data.description|truncatechars:100 }}</p>
+                                </div>
+                            </div>
+                        {% elif step.type == 'travel' %}
+                            <div class="timeline-step">
+                                <div class="timeline-icon timeline-travel-icon">
+                                    <i class="bi bi-car-front-fill"></i>
+                                </div>
+                                <div class="ms-4 py-2">
+                                    <div class="d-flex align-items-center text-muted small bg-light rounded-pill px-3 py-1 d-inline-flex border">
+                                        <i class="bi bi-arrow-down-up me-2 text-primary"></i>
+                                        <span>Travel to next stop</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="fw-medium text-dark">{{ step.distance }} km</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="fw-medium text-dark">{{ step.travel_time }} mins</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="fw-medium text-dark">₹{{ step.travel_cost }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="timeline-step">
+                            <div class="timeline-icon text-muted" style="border-color: #cbd5e1;"><i class="bi bi-dash"></i></div>
+                            <div class="ms-4 text-muted fst-italic">No activities scheduled for this day.</div>
+                        </div>
+                    {% endfor %}
+
+                    {% if plan.remaining_hours > 0.1 %}
+                        <div class="timeline-step">
+                            <div class="timeline-icon" style="border-color: #10b981; color: #10b981;">
+                                <i class="bi bi-cup-hot-fill"></i>
+                            </div>
+                            <div class="tm-card p-3 ms-4 bg-light border-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="fw-bold text-muted">Free Time / Leisure</div>
+                                    </div>
+                                    <div class="text-muted small fw-medium">
+                                        <i class="bi bi-stopwatch"></i> {{ plan.remaining_hours|floatformat:1 }}h
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

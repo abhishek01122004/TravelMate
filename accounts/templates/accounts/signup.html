@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Create Account{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signup-card {
+        border-radius: 1.5rem;
+        overflow: hidden;
+        border: 1px solid var(--tm-border);
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        background: var(--tm-surface);
+    }
+    .signup-header {
+        background: linear-gradient(135deg, var(--tm-primary), #a855f7);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        color: white;
+    }
+    .profile-pic-container {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        background: rgba(255,255,255,0.2);
+        border: 3px solid rgba(255,255,255,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .profile-pic-container:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: white;
+    }
+    .profile-pic-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+    }
+    .profile-pic-icon {
+        font-size: 3rem;
+        color: white;
+        opacity: 0.8;
+    }
+    .profile-pic-container.has-image .profile-pic-icon {
+        display: none;
+    }
+    .profile-pic-container.has-image .profile-pic-preview {
+        display: block;
+    }
+    .form-floating > label {
+        color: var(--tm-text-muted);
+        padding-left: 1.5rem;
+    }
+    .form-floating > .form-control {
+        border-radius: 0.75rem;
+        border: 1px solid var(--tm-border);
+        padding-left: 1.5rem;
+    }
+    .form-floating > .form-control:focus {
+        border-color: var(--tm-primary);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+    
+    /* Password Rules Panel */
+    .password-info-btn {
+        background: none;
+        border: none;
+        color: var(--tm-text-muted);
+        cursor: pointer;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .password-info-btn:hover, .password-info-btn.active {
+        color: var(--tm-primary);
+    }
+    .password-rules-panel {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--tm-bg);
+        border-radius: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    .password-rules-panel.show {
+        max-height: 200px;
+        opacity: 1;
+        padding: 1rem;
+        border: 1px solid var(--tm-border);
+    }
+    .rule-item {
+        font-size: 0.85rem;
+        color: var(--tm-text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+        transition: color 0.3s;
+    }
+    .rule-item.valid {
+        color: #10b981;
+    }
+    .rule-icon {
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--tm-border);
+        color: white;
+        font-size: 0.6rem;
+        transition: background 0.3s;
+    }
+    .rule-item.valid .rule-icon {
+        background: #10b981;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in py-4">
+    <div class="col-12 col-lg-10 col-xl-8">
+        
+        <div class="signup-card">
+            <form method="post" enctype="multipart/form-data" id="signupForm">
+                {% csrf_token %}
+                
+                <div class="signup-header">
+                    <!-- Profile Picture Upload -->
+                    <div class="profile-pic-container" onclick="document.getElementById('id_profile_picture').click()" id="picContainer">
+                        <i class="bi bi-camera-fill profile-pic-icon"></i>
+                        <img src="" alt="Profile Preview" class="profile-pic-preview" id="picPreview">
+                    </div>
+                    <div class="d-none">
+                        {{ form.profile_picture }}
+                    </div>
+                    
+                    <h1 class="h3 fw-bold mb-1">Join TravelMate</h1>
+                    <p class="mb-0 text-white-50">Start planning your next great adventure.</p>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-3 mb-4">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-4">
+                        <!-- Account Details Column -->
+                        <div class="col-12 col-md-6">
+                            <h4 class="h6 fw-bold text-uppercase text-muted mb-3 letter-spacing-1">Account Details</h4>
+                            
+                            <div class="form-floating mb-3">
+                                {{ form.username }}
+                                <label for="{{ form.username.id_for_label }}"><i class="bi bi-person me-2"></i>Username</label>
+                                {% if form.username.errors %}<div class="text-danger small mt-1 px-3">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                {{ form.email }}
+                                <label for="{{ form.email.id_for_label }}"><i class="bi bi-envelope me-2"></i>Email Address</label>
+                                {% if form.email.errors %}<div class="text-danger small mt-1 px-3">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="form-floating mb-1">
+                                {{ form.password1 }}
+                                <label for="{{ form.password1.id_for_label }}">
+                                    <i class="bi bi-lock me-2"></i>Password 
+                                    <button type="button" class="password-info-btn ms-2" id="pwdInfoBtn" title="Password Rules">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </button>
+                                </label>
+                                {% if form.password1.errors %}<div class="text-danger small mt-1 px-3">{{ form.password1.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <!-- Password Rules Panel -->
+                            <div class="password-rules-panel" id="pwdRulesPanel">
+                                <div class="fw-bold small mb-2 text-dark">Password must contain:</div>
+                                <div class="rule-item" id="rule-length">
+                                    <span class="rule-icon"><i class="bi bi-check"></i></span> At least 8 characters
+                                </div>
+                                <div class="rule-item" id="rule-upper">
+                                    <span class="rule-icon"><i class="bi bi-check"></i></span> One uppercase letter
+                                </div>
+                                <div class="rule-item" id="rule-number">
+                                    <span class="rule-icon"><i class="bi bi-check"></i></span> One number
+                                </div>
+                                <div class="rule-item" id="rule-special">
+                                    <span class="rule-icon"><i class="bi bi-check"></i></span> One special character
+                                </div>
+                            </div>
+
+                            <div class="form-floating mt-3 mb-3">
+                                {{ form.password2 }}
+                                <label for="{{ form.password2.id_for_label }}"><i class="bi bi-shield-check me-2"></i>Confirm Password</label>
+                                {% if form.password2.errors %}<div class="text-danger small mt-1 px-3">{{ form.password2.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Personal Details Column -->
+                        <div class="col-12 col-md-6">
+                            <h4 class="h6 fw-bold text-uppercase text-muted mb-3 letter-spacing-1">Personal Info</h4>
+                            
+                            <div class="form-floating mb-3">
+                                {{ form.phone_number }}
+                                <label for="{{ form.phone_number.id_for_label }}"><i class="bi bi-telephone me-2"></i>Phone Number *</label>
+                                {% if form.phone_number.errors %}<div class="text-danger small mt-1 px-3">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                {{ form.age }}
+                                <label for="{{ form.age.id_for_label }}"><i class="bi bi-calendar3 me-2"></i>Age</label>
+                                {% if form.age.errors %}<div class="text-danger small mt-1 px-3">{{ form.age.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                {{ form.city }}
+                                <label for="{{ form.city.id_for_label }}"><i class="bi bi-geo-alt me-2"></i>City</label>
+                                {% if form.city.errors %}<div class="text-danger small mt-1 px-3">{{ form.city.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                {{ form.address }}
+                                <label for="{{ form.address.id_for_label }}"><i class="bi bi-house me-2"></i>Full Address</label>
+                                {% if form.address.errors %}<div class="text-danger small mt-1 px-3">{{ form.address.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 border-opacity-50">
+
+                    <button class="btn btn-tm-primary btn-lg w-100 fw-bold rounded-pill" type="submit">Create Account <i class="bi bi-arrow-right ms-2"></i></button>
+
+                    <div class="text-center mt-4 text-muted">
+                        Already have an account? <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none">Log in</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Profile Picture Preview ---
+        const fileInput = document.getElementById('id_profile_picture');
+        const previewImg = document.getElementById('picPreview');
+        const container = document.getElementById('picContainer');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        container.classList.add('has-image');
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+
+        // --- Password Rules Toggle & Validation ---
+        const pwdInput = document.getElementById('id_password1');
+        const infoBtn = document.getElementById('pwdInfoBtn');
+        const rulesPanel = document.getElementById('pwdRulesPanel');
+        
+        const rLength = document.getElementById('rule-length');
+        const rUpper = document.getElementById('rule-upper');
+        const rNumber = document.getElementById('rule-number');
+        const rSpecial = document.getElementById('rule-special');
+
+        if (pwdInput && infoBtn) {
+            // Toggle panel
+            infoBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('active');
+                rulesPanel.classList.toggle('show');
+            });
+
+            // Show panel on focus
+            pwdInput.addEventListener('focus', function() {
+                infoBtn.classList.add('active');
+                rulesPanel.classList.add('show');
+            });
+
+            // Validate on input
+            pwdInput.addEventListener('input', function() {
+                const val = this.value;
+                
+                // Check length (8+)
+                if (val.length >= 8) rLength.classList.add('valid');
+                else rLength.classList.remove('valid');
+
+                // Check uppercase
+                if (/[A-Z]/.test(val)) rUpper.classList.add('valid');
+                else rUpper.classList.remove('valid');
+
+                // Check number
+                if (/[0-9]/.test(val)) rNumber.classList.add('valid');
+                else rNumber.classList.remove('valid');
+
+                // Check special char
+                if (/[^A-Za-z0-9]/.test(val)) rSpecial.classList.add('valid');
+                else rSpecial.classList.remove('valid');
+            });
+        }
+        // --- Prevent Double Submission ---
+        const form = document.getElementById('signupForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (form && submitBtn) {
+            form.addEventListener('submit', function() {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creating Account...';
+            });
+        }
+    });
+</script>
+{% endblock %}
+

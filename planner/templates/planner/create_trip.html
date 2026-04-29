@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | Plan Trip{% endblock %}
+
+{% block extra_css %}
+<style>
+    .step-container {
+        display: none;
+        animation: fadeInRight 0.4s ease-out forwards;
+    }
+    .step-container.active {
+        display: block;
+    }
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .progress-bar-container {
+        height: 6px;
+        background: var(--tm-border);
+        border-radius: 50rem;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--tm-primary), #a855f7);
+        width: 25%;
+        transition: width 0.4s ease-out;
+    }
+    .form-floating > label {
+        color: var(--tm-text-muted);
+    }
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(79, 70, 229, 0.1);
+        color: var(--tm-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in py-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="text-center mb-4">
+            <h1 class="h3 fw-bold mb-2">Let's plan your journey</h1>
+            <p class="text-muted">Tell us what you're looking for, and we'll craft the perfect itinerary.</p>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="formProgress"></div>
+        </div>
+
+        <div class="tm-card p-4 p-md-5">
+            <form method="post" id="tripForm">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger rounded-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Step 1: Destination -->
+                <div class="step-container active" id="step1">
+                    <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
+                    <h3 class="h5 fw-bold mb-4">Where do you want to go?</h3>
+                    <div class="mb-4">
+                        <label class="form-label fw-medium" for="{{ form.destination.id_for_label }}">Select Destination</label>
+                        {{ form.destination }}
+                        {% if form.destination.errors %}<div class="text-danger small mt-1">{{ form.destination.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-tm-primary px-4" onclick="nextStep(2)">Next <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Dates -->
+                <div class="step-container" id="step2">
+                    <div class="icon-box"><i class="bi bi-calendar-range-fill"></i></div>
+                    <h3 class="h5 fw-bold mb-4">When are you travelling?</h3>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium" for="{{ form.start_date.id_for_label }}">Start Date</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}<div class="text-danger small mt-1">{{ form.start_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium" for="{{ form.end_date.id_for_label }}">End Date</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}<div class="text-danger small mt-1">{{ form.end_date.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-tm-ghost px-4" onclick="prevStep(1)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                        <button type="button" class="btn btn-tm-primary px-4" onclick="nextStep(3)">Next <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Vibe -->
+                <div class="step-container" id="step3">
+                    <div class="icon-box"><i class="bi bi-people-fill"></i></div>
+                    <h3 class="h5 fw-bold mb-4">Who is going?</h3>
+                    <div class="row g-4 mb-4">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium" for="{{ form.num_people.id_for_label }}">Travelers</label>
+                            {{ form.num_people }}
+                            {% if form.num_people.errors %}<div class="text-danger small mt-1">{{ form.num_people.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium" for="{{ form.trip_type.id_for_label }}">Trip Type</label>
+                            {{ form.trip_type }}
+                            {% if form.trip_type.errors %}<div class="text-danger small mt-1">{{ form.trip_type.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-tm-ghost px-4" onclick="prevStep(2)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                        <button type="button" class="btn btn-tm-primary px-4" onclick="nextStep(4)">Next <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Budget -->
+                <div class="step-container" id="step4">
+                    <div class="icon-box"><i class="bi bi-wallet2"></i></div>
+                    <h3 class="h5 fw-bold mb-4">What is your activity budget?</h3>
+                    <p class="text-muted small mb-3">This covers attractions, food, and local travel. Your hotel cost will be tracked separately.</p>
+                    <div class="mb-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-medium border-end-0 text-muted">₹</span>
+                            <input type="number" name="budget" value="{{ form.budget.value|default:'' }}" class="form-control border-start-0 ps-0" min="0" id="budget" required>
+                        </div>
+                        {% if form.budget.errors %}<div class="text-danger small mt-1">{{ form.budget.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-tm-ghost px-4" onclick="prevStep(3)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                        <button type="submit" class="btn btn-tm-accent px-4 fw-bold">Generate Itinerary <i class="bi bi-magic ms-1"></i></button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set minimum date to today for date inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').setAttribute('min', today);
+        document.getElementById('end_date').setAttribute('min', today);
+        
+        // Dynamically update end_date min based on start_date selection
+        document.getElementById('start_date').addEventListener('change', function() {
+            if (this.value) {
+                const minEndDate = new Date(this.value);
+                minEndDate.setDate(minEndDate.getDate() + 1); // Must be after start date
+                document.getElementById('end_date').setAttribute('min', minEndDate.toISOString().split('T')[0]);
+                
+                // Reset end date if it's now invalid
+                const currentEndDate = document.getElementById('end_date').value;
+                if (currentEndDate && currentEndDate <= this.value) {
+                    document.getElementById('end_date').value = '';
+                }
+            }
+        });
+    });
+
+    function nextStep(step) {
+        document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        document.getElementById('formProgress').style.width = (step * 25) + '%';
+    }
+    
+    function prevStep(step) {
+        document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        document.getElementById('formProgress').style.width = (step * 25) + '%';
+    }
+
+    // If there are form errors (server-side validation failed), show all fields so user isn't stuck
+    {% if form.errors %}
+        document.querySelectorAll('.step-container').forEach(el => el.classList.add('active'));
+        document.getElementById('formProgress').style.width = '100%';
+        document.querySelector('.d-flex.justify-content-between').style.display = 'none'; // hide navigation buttons
+    {% endif %}
+</script>
+{% endblock %}

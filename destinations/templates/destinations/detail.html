@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}TravelMate | {{ destination.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a class="text-decoration-none" href="{% url 'destination_list' %}">&larr; Back to Destinations</a>
+</div>
+
+<div class="card shadow-sm mb-4 overflow-hidden">
+    <img
+        class="w-100 object-fit-cover"
+        src="{{ destination.display_cover_url }}"
+        alt="{{ destination.name }}"
+        style="max-height: 260px; object-fit: cover;"
+        loading="lazy"
+    />
+    <div class="card-body">
+        <h1 class="h3 mb-2">{{ destination.name }}</h1>
+        <p class="text-muted mb-3">{{ destination.description }}</p>
+        <span class="badge text-bg-secondary">Best time: {{ destination.best_time }}</span>
+    </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="h5 mb-0">Attractions</h2>
+</div>
+
+<div class="row g-3">
+    {% for attraction in attractions %}
+        <div class="col-12 col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between gap-3">
+                        <div>
+                            <h5 class="card-title mb-1">{{ attraction.name }}</h5>
+                            <div class="text-muted small">{{ attraction.category }}</div>
+                        </div>
+                        <div class="text-end small text-muted">
+                            <div>{{ attraction.estimated_time }}h</div>
+                            <div>Cost: {{ attraction.approx_cost }}</div>
+                        </div>
+                    </div>
+                    <p class="card-text mt-3 mb-0 text-muted">
+                        {{ attraction.description|truncatechars:140 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info mb-0">No attractions added for this destination yet.</div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
